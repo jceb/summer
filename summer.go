@@ -18,6 +18,10 @@ func main() {
 
 	flag.Parse()
 
+	if field < 1 {
+		fmt.Fprintln(os.Stderr, "ERROR: Field must be bigger than 1")
+		os.Exit(1)
+	}
 	// start counting fields at 0
 	field -= 1
 
