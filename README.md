@@ -1,4 +1,4 @@
 summer
 ======
 
-Sum values in colum and print result
+Sum values in column and print result
