@@ -6,24 +6,30 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	// "unicode"
 )
 
-func parse_line(line string, delimiter string, field int) float64 {
-	var _field string
+type Opts struct {
+	prnt bool
+	delimiter string
+	field int
+}
 
-	if delimiter == "" {
+func parse_line(line string, opts *Opts) float64 {
+	var _field string
+	var fields []string
+
+	if opts.delimiter == "" {
 		// take any space as separator, like awk
-		fields := strings.Fields(line)
-		if len(fields) > field {
-			_field = fields[field]
-		} else {
-			// ignore lines with not enough fields
-			return 0
-		}
+		fields = strings.Fields(line)
 	} else {
 		// a specific separator has been specified
-		strings.Split(delimiter, line)
+		fields = strings.Split(line, opts.delimiter)
+	}
+
+	if len(fields) > opts.field {
+		_field = strings.Fields(fields[opts.field])[0]
+	} else {
+		return 0
 	}
 
 	value, e := strconv.ParseFloat(_field, 32)
@@ -34,7 +40,7 @@ func parse_line(line string, delimiter string, field int) float64 {
 	return value
 }
 
-func parse_string(s string, delimiter string, field int, prnt bool) (float64, string) {
+func parse_string(s string, opts *Opts) (float64, string) {
 	remainder := ""
 	idx := strings.Index(s, "\n")
 	len_l := len(s)
@@ -43,10 +49,10 @@ func parse_string(s string, delimiter string, field int, prnt bool) (float64, st
 
 	// compute value for field in string
 	for idx != -1 && offset < len_l {
-		if prnt {
+		if opts.prnt {
 			fmt.Println(s[offset:offset+idx])
 		}
-		sum += parse_line(s[offset:offset+idx], delimiter, field)
+		sum += parse_line(s[offset:offset+idx], opts)
 
 		// increase offset and idx
 		offset += idx + 1
@@ -70,20 +76,20 @@ func main() {
 	var sum float64 = 0
 	var res float64
 	var remainder string
+	var opts *Opts = new(Opts)
 	stream := make([]byte, 1024)
 
-	prnt := flag.Bool("p", false, "Print input")
-	del := flag.String("d", "", "Use delimiter instead of space-like characters")
-	// del_isspace := unicode.IsSpace(rune((*del)[0]))
-	field := flag.Int("f", 1, "Selected field")
+	flag.BoolVar(&(opts.prnt), "p", false, "Print input")
+	flag.StringVar(&(opts.delimiter), "d", "", "Use delimiter instead of space-like characters")
+	flag.IntVar(&(opts.field), "f", 1, "Selected field")
 	flag.Parse()
 
 	// start counting fields at 0
-	if *field < 1 {
+	if int(opts.field) < 1 {
 		fmt.Fprintln(os.Stderr, "ERROR: Field must be bigger than 1")
 		os.Exit(1)
 	}
-	*field -= 1
+	opts.field -= 1
 
 
 	// read input from STDIN
@@ -95,7 +101,7 @@ func main() {
 			// truncate remainder since it's part of s now
 			remainder = ""
 		}
-		res, remainder = parse_string(s, *del, *field, *prnt)
+		res, remainder = parse_string(s, opts)
 		sum += res
 	}
 
