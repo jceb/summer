@@ -14,7 +14,7 @@ type Opts struct {
 	field int
 }
 
-func parse_line(line string, opts *Opts) float64 {
+func SumLine(line string, opts *Opts) float64 {
 	var _field string
 	var fields []string
 
@@ -40,8 +40,9 @@ func parse_line(line string, opts *Opts) float64 {
 	return value
 }
 
-func parse_string(s string, opts *Opts) (float64, string) {
+func SumString(s string, opts *Opts) (float64, string) {
 	remainder := ""
+	// FIXME make newline cross platform compatible
 	idx := strings.Index(s, "\n")
 	len_l := len(s)
 	offset := 0
@@ -52,11 +53,12 @@ func parse_string(s string, opts *Opts) (float64, string) {
 		if opts.prnt {
 			fmt.Println(s[offset:offset+idx])
 		}
-		sum += parse_line(s[offset:offset+idx], opts)
+		sum += SumLine(s[offset:offset+idx], opts)
 
 		// increase offset and idx
 		offset += idx + 1
 		if offset < len_l {
+			// FIXME make newline cross platform compatible
 			idx = strings.Index(s[offset:], "\n")
 		} else {
 			break
@@ -101,7 +103,7 @@ func main() {
 			// truncate remainder since it's part of s now
 			remainder = ""
 		}
-		res, remainder = parse_string(s, opts)
+		res, remainder = SumString(s, opts)
 		sum += res
 	}
 
