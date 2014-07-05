@@ -17,7 +17,7 @@ type Opts struct {
 }
 
 func SumLine(line string, opts *Opts) float64 {
-	var _field string
+	var field string
 	var fields []string
 
 	if opts.delimiter == "" {
@@ -29,12 +29,17 @@ func SumLine(line string, opts *Opts) float64 {
 	}
 
 	if len(fields) > opts.field {
-		_field = strings.Fields(fields[opts.field])[0]
+		fields = strings.Fields(fields[opts.field])
+		if len(fields) > 0 {
+			field = fields[0]
+		} else {
+			return 0
+		}
 	} else {
 		return 0
 	}
 
-	value, e := strconv.ParseFloat(_field, 32)
+	value, e := strconv.ParseFloat(field, 32)
 	if e == strconv.ErrSyntax {
 		return 0
 	}

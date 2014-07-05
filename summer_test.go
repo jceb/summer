@@ -23,7 +23,22 @@ func TestIgnoreNonNumbers(t *testing.T) {
 	opts := new(Opts)
 	opts.prnt, opts.delimiter, opts.field = false, ";", 1
 
-	const in string = "1;2\na;1\n3;4\n"
+	const in string = "1;2\na;1\n\n ; \n3;4\n"
+	var out []float64 = []float64{4, 7}
+
+	for i := range out {
+		opts.field = i
+		if sum, _ := SumString(in, opts); sum != out[i] {
+			t.Errorf("SumString(%v) = %v, want %v", in, sum, out[i])
+		}
+	}
+}
+
+func TestIgnoreSpace(t *testing.T) {
+	opts := new(Opts)
+	opts.prnt, opts.delimiter, opts.field = false, ";", 1
+
+	const in string = " \t1 ;2\t\na;   1   \n\t\t3;\t4\n"
 	var out []float64 = []float64{4, 7}
 
 	for i := range out {
