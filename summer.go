@@ -1,12 +1,14 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
+	goopt "github.com/droundy/goopt"
 )
+
+const VERSION = "0.1"
 
 type Opts struct {
 	prnt bool
@@ -81,10 +83,16 @@ func main() {
 	var opts *Opts = new(Opts)
 	stream := make([]byte, 1024)
 
-	flag.BoolVar(&(opts.prnt), "p", false, "Print input")
-	flag.StringVar(&(opts.delimiter), "d", "", "Use delimiter instead of space-like characters")
-	flag.IntVar(&(opts.field), "f", 1, "Selected field")
-	flag.Parse()
+	f := goopt.Int([]string{"-f", "--field"}, 1, "Selected field")
+	d := goopt.String([]string{"-d", "--delimiter"}, "", "Use delimiter instead of space-like characters")
+	p := goopt.Flag([]string{"-n", "--no-print"}, []string{"-p", "--print"}, "Don't print input", "Print input")
+	goopt.Version = VERSION
+	goopt.Summary = "Sum values in selected field"
+	goopt.Parse(nil)
+
+	opts.field = *f
+	opts.delimiter = *d
+	opts.prnt = !(*p)
 
 	// start counting fields at 0
 	if int(opts.field) < 1 {
