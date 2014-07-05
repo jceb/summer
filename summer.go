@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"math"
 	"strconv"
 	"strings"
 	goopt "github.com/droundy/goopt"
@@ -80,8 +81,12 @@ func SumString(s string, opts *Opts) (float64, string) {
 	return sum, remainder
 }
 
+func Round(value float64, digits int) float64 {
+	scale := math.Pow(10, float64(digits))
+	return float64(int(math.Floor((value * scale)+0.5))) / scale
+}
+
 func main() {
-	// sum
 	var sum float64 = 0
 	var res float64
 	var remainder string
@@ -91,6 +96,7 @@ func main() {
 	f := goopt.Int([]string{"-f", "--field"}, 1, "Selected field")
 	d := goopt.String([]string{"-d", "--delimiter"}, "", "Use delimiter instead of space-like characters")
 	p := goopt.Flag([]string{"-n", "--no-print"}, []string{"-p", "--print"}, "Don't print input", "Print input")
+	s := goopt.Int([]string{"-s", "--scale"}, 2, "Scale to number of digits after the decimal point")
 	goopt.Version = VERSION
 	goopt.Summary = "Sum values in selected field"
 	goopt.Parse(nil)
@@ -106,20 +112,17 @@ func main() {
 	}
 	opts.field -= 1
 
-
-	// read input from STDIN
 	for n, err := os.Stdin.Read(stream); n > 0 && err == nil; n, err = os.Stdin.Read(stream) {
-		s := string(stream[:n])
-		// join remainder and s
+		// read input from STDIN
+		input := string(stream[:n])
 		if remainder != "" {
-			s = strings.Join([]string{remainder, s}, "")
-			// truncate remainder since it's part of s now
+			// join remainder and input
+			input = strings.Join([]string{remainder, input}, "")
+			// truncate remainder since it's part of input now
 			remainder = ""
 		}
-		res, remainder = SumString(s, opts)
+		res, remainder = SumString(input, opts)
 		sum += res
 	}
-
-	// print sum
-	fmt.Println(sum)
+	fmt.Printf("%." + strconv.Itoa(*s) + "g\n", Round(sum, *s))
 }
