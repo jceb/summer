@@ -17,7 +17,7 @@ Options:
 
 Install [go](http://golang.org) and run the following command:
 <pre>
-go get github.com/jceb/summer
+&gt; go get github.com/jceb/summer
 </pre>
 
 The summer command should now be available.
@@ -53,7 +53,7 @@ result in an additional line below the selection.
 ### Let's sum the first column
 
 <pre>
-> summer < FILE
+&gt; summer &lt; FILE
 Num     Time   IsoTime  Other Separator
 1 	    2h3m   3:01     ; 4
 2 	    3h4m   2:01     ; 4
@@ -75,7 +75,7 @@ The result is 72.57.
 ### Let's sum the third column without printing the input
 
 <pre>
-> summer -f 3 -n < FILE
+&gt; summer -f 3 -n &lt; FILE
 80h12m1s
 </pre>
 The result is 80h12m1s.
@@ -83,7 +83,7 @@ The result is 80h12m1s.
 ### Let's sum the fourth column
 
 <pre>
-> summer -f 4 -n < FILE
+&gt; summer -f 4 -n &lt; FILE
 4.00
 </pre>
 Wait, the result is 4.00.  Shouldn't it be much higher?
@@ -91,7 +91,7 @@ Wait, the result is 4.00.  Shouldn't it be much higher?
 ### Let's sum the fourth (second) column by changing the separator
 
 <pre>
-> summer -f 2 -n -d \; < FILE
+&gt; summer -f 2 -n -d \; &lt; FILE
 52.00
 </pre>
 This looks much better.  The result is 52.00.
