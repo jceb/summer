@@ -21,10 +21,10 @@ to come
 
 * Make line separator cross platform, function SumString
 * Support binary, octal and hex and values
-* Support negative times in -3:04 format
 * Support negative fields that are counted from the right
 * Return a proper error code when values couldn't be parsed
 
 # Done
-* Support summing time durations like 2hm3, 2014-07-06
+* Support negative times in -3:04 format, 2014-07-06
 * Support summing time durations like 2:03, 2014-07-06
+* Support summing time durations like 2hm3, 2014-07-06

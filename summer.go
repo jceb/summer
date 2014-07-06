@@ -53,11 +53,20 @@ func SumLine(line string, opts *Opts, sum *Sum) {
 	if opts.sum_type == 2 || opts.sum_type == -1 {
 		_d, e := time.ParseDuration(field)
 		if e != nil {
+			var neg bool = false
+			if field[0:1] == "-" {
+				neg = true
+				field = field[1:]
+			}
 			var _t time.Time
 			for i := range TIME_FORMATS {
 				_t, e = time.Parse(TIME_FORMATS[i], field)
 				if e == nil {
-					_d = _t.Sub(BEGINNING)
+					if neg {
+						_d = BEGINNING.Sub(_t)
+					} else {
+						_d = _t.Sub(BEGINNING)
+					}
 					break
 				}
 			}
