@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"math"
@@ -11,8 +12,9 @@ import (
 )
 
 const VERSION = "0.1"
-var BEGINNING time.Time = time.Date(0, time.January, 1, 0, 0, 0, 0, time.UTC)
-var TIME_FORMATS []string = []string{"3:4:5", "3:4"}
+// hours, minutes, seconds
+var TIME_MULTIPLIERS = []int64{1000000000 * 60 * 60,1000000000 * 60, 1000000000}
+
 
 type Sum struct {
 	f float64
@@ -24,6 +26,66 @@ type Opts struct {
 	delimiter string
 	field int
 	sum_type int // type -1 undecided, 1 float, 2 duration
+}
+
+// taken from http://golang.org/src/pkg/time/format.go
+var errLeadingInt = errors.New("time: bad [0-9]*") // never printed
+
+func leadingInt(s string) (x int64, rem string, err error) {
+	i := 0
+	for ; i < len(s); i++ {
+		c := s[i]
+		if c < '0' || c > '9' {
+			break
+		}
+		if x >= (1<<63-10)/10 {
+			// overflow
+			return 0, "", errLeadingInt
+		}
+		x = x*10 + int64(c) - '0'
+	}
+	return x, s[i:], nil
+}
+// taken from http://golang.org/src/pkg/time/format.go END
+
+
+var errTimeFormat = errors.New("time: bad format HH:MM[:SS]") // never printed
+
+func ParseDuration(s string) (time.Duration, error) {
+	neg := int64(1)
+	d := int64(0)
+	if s[0:1] == "-" {
+		neg = -1
+		s = s[1:]
+	}
+	// parse [HH]:MM:SS
+	t := 0
+	for s != "" {
+		if '0' <= s[0] && s[0] <= '9' {
+			i, rem, err := leadingInt(s)
+			if err == nil {
+				s = rem
+				d += i * TIME_MULTIPLIERS[t]
+				continue
+			} else {
+				return time.Duration(0), err
+			}
+		}
+		if s[0] == ':' {
+			s = s[1:]
+			t++
+			if t >= len(TIME_MULTIPLIERS) {
+				break
+			}
+		} else {
+			break
+		}
+	}
+
+	if t < 1 {
+		return time.Duration(0), errTimeFormat
+	}
+	return time.Duration(neg * d), nil
 }
 
 func SumLine(line string, opts *Opts, sum *Sum) {
@@ -53,23 +115,7 @@ func SumLine(line string, opts *Opts, sum *Sum) {
 	if opts.sum_type == 2 || opts.sum_type == -1 {
 		_d, e := time.ParseDuration(field)
 		if e != nil {
-			var neg bool = false
-			if field[0:1] == "-" {
-				neg = true
-				field = field[1:]
-			}
-			var _t time.Time
-			for i := range TIME_FORMATS {
-				_t, e = time.Parse(TIME_FORMATS[i], field)
-				if e == nil {
-					if neg {
-						_d = BEGINNING.Sub(_t)
-					} else {
-						_d = _t.Sub(BEGINNING)
-					}
-					break
-				}
-			}
+			_d, e = ParseDuration(field)
 		}
 		if e == nil {
 			sum.d += _d

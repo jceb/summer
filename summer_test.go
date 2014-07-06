@@ -71,11 +71,19 @@ func TestSumDuration(t *testing.T) {
 }
 
 func TestSumIsoTime(t *testing.T) {
-	var in string = "10:00:01;11:00:00\n03:00;4:20\n3:00;9:00\n"
-	var out []time.Duration = []time.Duration{time.Duration(16*60*60*SECONDS + 1*SECONDS), time.Duration(24*60*60*SECONDS + 20*60*SECONDS)}
+	var in string = "10:00:01;13:00\n03:00;4:20\n3:00;9:00\n"
+	var out []time.Duration = []time.Duration{time.Duration(16*60*60*SECONDS + 1*SECONDS), time.Duration(26*60*60*SECONDS + 20*60*SECONDS)}
 
 	SumDuration(t, &in, &out)
 }
+
+func TestSumHugeIsoTime(t *testing.T) {
+	var in string = "30:00:01;13:00\n03:70;4:20:3600\n3:00;9:00\n"
+	var out []time.Duration = []time.Duration{time.Duration(37*60*60*SECONDS + 10*60*SECONDS + 1*SECONDS), time.Duration(27*60*60*SECONDS + 20*60*SECONDS)}
+
+	SumDuration(t, &in, &out)
+}
+
 
 func TestSumNegativeIsoTime(t *testing.T) {
 	var in string = "10:00:01;11:00:00\n-;0:0\n-03:00;4:20\n3:00;9:00\n"
