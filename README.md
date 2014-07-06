@@ -13,6 +13,15 @@ Options:
         --help        show usage message
 </pre>
 
+## Installation
+
+Install [go](http://golang.org) and run the following command:
+<pre>
+go get github.com/jceb/summer
+</pre>
+
+The summer command should now be available.
+
 ## Examples
 
 Consider this file containing multiple fields, semi aligned with spaces and tabs
