@@ -11,6 +11,8 @@ import (
 )
 
 const VERSION = "0.1"
+var BEGINNING time.Time = time.Date(0, time.January, 1, 0, 0, 0, 0, time.UTC)
+var TIME_FORMATS []string = []string{"3:4:5", "3:4"}
 
 type Sum struct {
 	f float64
@@ -50,6 +52,16 @@ func SumLine(line string, opts *Opts, sum *Sum) {
 	// parse duration
 	if opts.sum_type == 2 || opts.sum_type == -1 {
 		_d, e := time.ParseDuration(field)
+		if e != nil {
+			var _t time.Time
+			for i := range TIME_FORMATS {
+				_t, e = time.Parse(TIME_FORMATS[i], field)
+				if e == nil {
+					_d = _t.Sub(BEGINNING)
+					break
+				}
+			}
+		}
 		if e == nil {
 			sum.d += _d
 			if opts.sum_type == -1 {

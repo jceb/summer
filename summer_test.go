@@ -62,9 +62,17 @@ func TestSumFloats(t *testing.T) {
 }
 
 const SECONDS = 1000000000
+
 func TestSumDuration(t *testing.T) {
 	var in string = "10h;11h\n3h;4h20m\n-3h;-9h\n"
 	var out []time.Duration = []time.Duration{time.Duration(10*60*60*SECONDS), time.Duration(6*60*60*SECONDS + 20*60*SECONDS)}
+
+	SumDuration(t, &in, &out)
+}
+
+func TestSumIsoTime(t *testing.T) {
+	var in string = "10:00:01;11:00:00\n03:00;4:20\n3:00;9:00\n"
+	var out []time.Duration = []time.Duration{time.Duration(16*60*60*SECONDS + 1*SECONDS), time.Duration(24*60*60*SECONDS + 20*60*SECONDS)}
 
 	SumDuration(t, &in, &out)
 }
