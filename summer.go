@@ -6,18 +6,25 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"time"
 	goopt "github.com/droundy/goopt"
 )
 
 const VERSION = "0.1"
 
+type Sum struct {
+	f float64
+	d time.Duration
+}
+
 type Opts struct {
 	prnt bool
 	delimiter string
 	field int
+	sum_type int // type -1 undecided, 1 float, 2 duration
 }
 
-func SumLine(line string, opts *Opts) float64 {
+func SumLine(line string, opts *Opts, sum *Sum) {
 	var field string
 	var fields []string
 
@@ -34,39 +41,50 @@ func SumLine(line string, opts *Opts) float64 {
 		if len(fields) > 0 {
 			field = fields[0]
 		} else {
-			return 0
+			return
 		}
 	} else {
-		return 0
+		return
 	}
 
-	value, e := strconv.ParseFloat(field, 32)
-	if e == strconv.ErrSyntax {
-		return 0
+	// parse duration
+	if opts.sum_type == 2 || opts.sum_type == -1 {
+		_d, e := time.ParseDuration(field)
+		if e == nil {
+			sum.d += _d
+			if opts.sum_type == -1 {
+				opts.sum_type = 2
+			}
+		}
 	}
-
-	return value
+	// parse float
+	if opts.sum_type == 1 || opts.sum_type == -1 {
+		_f, e := strconv.ParseFloat(field, 32)
+		if e == nil {
+			sum.f += _f
+			if opts.sum_type == -1 {
+				opts.sum_type = 1
+			}
+		}
+	}
 }
 
-func SumString(s string, opts *Opts) (float64, string) {
+func SumString(s string, opts *Opts, sum *Sum) string {
 	remainder := ""
-	// FIXME make newline cross platform compatible
 	idx := strings.Index(s, "\n")
 	len_l := len(s)
 	offset := 0
-	var sum float64 = 0
 
 	// compute value for field in string
 	for idx != -1 && offset < len_l {
 		if opts.prnt {
 			fmt.Println(s[offset:offset+idx])
 		}
-		sum += SumLine(s[offset:offset+idx], opts)
+		SumLine(s[offset:offset+idx], opts, sum)
 
 		// increase offset and idx
 		offset += idx + 1
 		if offset < len_l {
-			// FIXME make newline cross platform compatible
 			idx = strings.Index(s[offset:], "\n")
 		} else {
 			break
@@ -77,28 +95,29 @@ func SumString(s string, opts *Opts) (float64, string) {
 			remainder = strings.Join([]string{remainder, s[offset:len_l]}, "")
 		}
 	}
-
-	return sum, remainder
+	return remainder
 }
 
 func Round(value float64, digits int) float64 {
-	scale := math.Pow(10, float64(digits))
-	return float64(int(math.Floor((value * scale)+0.5))) / scale
+	if digits >= 0 {
+		scale := math.Pow(10, float64(digits))
+		return float64(int(math.Floor((value * scale)+0.5))) / scale
+	}
+	return value
 }
 
 func main() {
-	var sum float64 = 0
-	var res float64
+	var sum Sum = Sum{0, time.Duration(0)}
 	var remainder string
-	var opts *Opts = new(Opts)
+	var opts Opts = Opts{true, "", 1, -1}
 	stream := make([]byte, 1024)
 
-	f := goopt.Int([]string{"-f", "--field"}, 1, "Selected field")
-	d := goopt.String([]string{"-d", "--delimiter"}, "", "Use delimiter instead of space-like characters")
+	f := goopt.Int([]string{"-f", "--field"}, opts.field, "Selected field")
+	d := goopt.String([]string{"-d", "--delimiter"}, opts.delimiter, "Use delimiter instead of space-like characters")
 	p := goopt.Flag([]string{"-n", "--no-print"}, []string{"-p", "--print"}, "Don't print input", "Print input")
 	s := goopt.Int([]string{"-s", "--scale"}, 2, "Scale to number of digits after the decimal point")
 	goopt.Version = VERSION
-	goopt.Summary = "Sum values in selected field"
+	goopt.Summary = "Sum values in column and print results"
 	goopt.Parse(nil)
 
 	opts.field = *f
@@ -121,8 +140,11 @@ func main() {
 			// truncate remainder since it's part of input now
 			remainder = ""
 		}
-		res, remainder = SumString(input, opts)
-		sum += res
+		remainder = SumString(input, &opts, &sum)
 	}
-	fmt.Printf("%." + strconv.Itoa(*s) + "g\n", Round(sum, *s))
+	if opts.sum_type == 1 {
+		fmt.Printf("%." + strconv.Itoa(*s) + "f\n", Round(sum.f, *s))
+	} else {
+		fmt.Println(sum.d)
+	}
 }
