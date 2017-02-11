@@ -31,6 +31,12 @@ type Opts struct {
 // taken from http://golang.org/src/pkg/time/format.go
 var errLeadingInt = errors.New("time: bad [0-9]*") // never printed
 
+func check(e error) {
+    if e != nil {
+        panic(e)
+    }
+}
+
 func leadingInt(s string) (x int64, rem string, err error) {
 	i := 0
 	for ; i < len(s); i++ {
@@ -199,6 +205,7 @@ func main() {
 	opts.field -= 1
 
 	for n, err := os.Stdin.Read(stream); n > 0 && err == nil; n, err = os.Stdin.Read(stream) {
+	    check(err)
 		// read input from STDIN
 		input := string(stream[:n])
 		if remainder != "" {
