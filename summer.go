@@ -162,11 +162,11 @@ func SumString(s string, opts *Opts, sum *Sum) string {
 		} else {
 			break
 		}
+	}
 
-		// extend remainder by new input
-		if offset < len_l {
-			remainder = strings.Join([]string{remainder, s[offset:len_l]}, "")
-		}
+	// extend remainder by new input
+	if offset < len_l {
+		remainder = strings.Join([]string{remainder, s[offset:len_l]}, "")
 	}
 	return remainder
 }
