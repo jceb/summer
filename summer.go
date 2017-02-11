@@ -3,18 +3,18 @@ package main
 import (
 	"errors"
 	"fmt"
-	"os"
+	goopt "github.com/droundy/goopt"
 	"math"
+	"os"
 	"strconv"
 	"strings"
 	"time"
-	goopt "github.com/droundy/goopt"
 )
 
 const VERSION = "0.1"
-// hours, minutes, seconds
-var TIME_MULTIPLIERS = []int64{1000000000 * 60 * 60,1000000000 * 60, 1000000000}
 
+// hours, minutes, seconds
+var TIME_MULTIPLIERS = []int64{1000000000 * 60 * 60, 1000000000 * 60, 1000000000}
 
 type Sum struct {
 	f float64
@@ -22,19 +22,19 @@ type Sum struct {
 }
 
 type Opts struct {
-	prnt bool
+	prnt      bool
 	delimiter string
-	field int
-	sum_type int // type -1 undecided, 1 float, 2 duration
+	field     int
+	sum_type  int // type -1 undecided, 1 float, 2 duration
 }
 
 // taken from http://golang.org/src/pkg/time/format.go
 var errLeadingInt = errors.New("time: bad [0-9]*") // never printed
 
 func check(e error) {
-    if e != nil {
-        panic(e)
-    }
+	if e != nil {
+		panic(e)
+	}
 }
 
 func leadingInt(s string) (x int64, rem string, err error) {
@@ -52,8 +52,8 @@ func leadingInt(s string) (x int64, rem string, err error) {
 	}
 	return x, s[i:], nil
 }
-// taken from http://golang.org/src/pkg/time/format.go END
 
+// taken from http://golang.org/src/pkg/time/format.go END
 
 var errTimeFormat = errors.New("time: bad format HH:MM[:SS]") // never printed
 
@@ -151,7 +151,7 @@ func SumString(s string, opts *Opts, sum *Sum) string {
 	// compute value for field in string
 	for idx != -1 && offset < len_l {
 		if opts.prnt {
-			fmt.Println(s[offset:offset+idx])
+			fmt.Println(s[offset : offset+idx])
 		}
 		SumLine(s[offset:offset+idx], opts, sum)
 
@@ -174,7 +174,7 @@ func SumString(s string, opts *Opts, sum *Sum) string {
 func Round(value float64, digits int) float64 {
 	if digits >= 0 {
 		scale := math.Pow(10, float64(digits))
-		return float64(int(math.Floor((value * scale)+0.5))) / scale
+		return float64(int(math.Floor((value*scale)+0.5))) / scale
 	}
 	return value
 }
@@ -205,7 +205,7 @@ func main() {
 	opts.field -= 1
 
 	for n, err := os.Stdin.Read(stream); n > 0 && err == nil; n, err = os.Stdin.Read(stream) {
-	    check(err)
+		check(err)
 		// read input from STDIN
 		input := string(stream[:n])
 		if remainder != "" {
@@ -217,7 +217,7 @@ func main() {
 		remainder = SumString(input, &opts, &sum)
 	}
 	if opts.sum_type == 1 {
-		fmt.Printf("%." + strconv.Itoa(*s) + "f\n", Round(sum.f, *s))
+		fmt.Printf("%."+strconv.Itoa(*s)+"f\n", Round(sum.f, *s))
 	} else {
 		fmt.Println(sum.d)
 	}

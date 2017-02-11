@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func SumFloat(t *testing.T, in *string, out *[]float64, digits int){
+func SumFloat(t *testing.T, in *string, out *[]float64, digits int) {
 	for i := range *out {
 		var sum Sum = Sum{0, time.Duration(0)}
 		var opts Opts = Opts{false, ";", i, -1}
@@ -15,7 +15,7 @@ func SumFloat(t *testing.T, in *string, out *[]float64, digits int){
 	}
 }
 
-func SumDuration(t *testing.T, in *string, out *[]time.Duration){
+func SumDuration(t *testing.T, in *string, out *[]time.Duration) {
 	for i := range *out {
 		var sum Sum = Sum{0, time.Duration(0)}
 		var opts Opts = Opts{false, ";", i, -1}
@@ -24,7 +24,6 @@ func SumDuration(t *testing.T, in *string, out *[]time.Duration){
 		}
 	}
 }
-
 
 func TestSimpleSum(t *testing.T) {
 	var in string = "1;2\n3;4\n"
@@ -65,7 +64,7 @@ const SECONDS = 1000000000
 
 func TestSumDuration(t *testing.T) {
 	var in string = "10h;11h\n3h;4h20m\n-3h;-9h\n"
-	var out []time.Duration = []time.Duration{time.Duration(10*60*60*SECONDS), time.Duration(6*60*60*SECONDS + 20*60*SECONDS)}
+	var out []time.Duration = []time.Duration{time.Duration(10 * 60 * 60 * SECONDS), time.Duration(6*60*60*SECONDS + 20*60*SECONDS)}
 
 	SumDuration(t, &in, &out)
 }
